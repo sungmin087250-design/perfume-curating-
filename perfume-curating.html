@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PERFUME CURATING — 파팡 에디터</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0b08;
+    --surface: #19140f;
+    --card: #211a12;
+    --border: #3a2e20;
+    --gold: #c9a96e;
+    --gold-light: #e8c98a;
+    --cream: #f5ead8;
+    --muted: #8a7660;
+    --text: #ede4d4;
+    --accent: #c9a96e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Ambient background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 20%, rgba(201,169,110,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(201,169,110,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 60px 0 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+
+  .header-eyebrow {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    opacity: 0.9;
+  }
+
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 7vw, 52px);
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    color: var(--cream);
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  .header h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .header-desc {
+    font-size: 13px;
+    line-height: 2;
+    color: var(--muted);
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 300;
+    max-width: 480px;
+    margin: 0 auto 24px;
+  }
+
+  .header-meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .meta-item {
+    background: var(--surface);
+    padding: 12px 16px;
+    text-align: left;
+  }
+
+  .meta-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .meta-value {
+    font-size: 13px;
+    color: var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+  }
+
+  /* Progress */
+  .progress-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(14,11,8,0.92);
+    backdrop-filter: blur(12px);
+    padding: 14px 0;
+    margin-bottom: 32px;
+    border-bottom: 1px solid rgba(58,46,32,0.5);
+  }
+
+  .progress-inner {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress-steps {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+  }
+
+  .step-dot {
+    height: 2px;
+    flex: 1;
+    background: var(--border);
+    transition: background 0.4s ease;
+    border-radius: 1px;
+  }
+
+  .step-dot.active { background: var(--gold); }
+  .step-dot.done { background: rgba(201,169,110,0.4); }
+
+  .progress-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  /* Sections */
+  .section {
+    display: none;
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .section.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    margin-bottom: 32px;
+  }
+
+  .section-num {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+    margin-bottom: 8px;
+    opacity: 0.8;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 400;
+    color: var(--cream);
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+  }
+
+  .section-desc {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.9;
+    font-family: 'Noto Serif KR', serif;
+  }
+
+  /* Question card */
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 24px 24px 20px;
+    margin-bottom: 12px;
+    transition: border-color 0.3s;
+  }
+
+  .q-card:hover { border-color: rgba(201,169,110,0.25); }
+
+  .q-card.required .q-label::after {
+    content: ' *';
+    color: var(--gold);
+    font-size: 12px;
+  }
+
+  .q-label {
+    font-size: 13.5px;
+    color: var(--cream);
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 400;
+    line-height: 1.7;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .q-sub {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  /* Inputs */
+  .input-text {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-size: 14px;
+    padding: 8px 0;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .input-text:focus { border-bottom-color: var(--gold); }
+  .input-text::placeholder { color: var(--muted); opacity: 0.6; font-size: 13px; }
+
+  textarea.input-text {
+    border: 1px solid var(--border);
+    padding: 12px;
+    resize: vertical;
+    min-height: 90px;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.8;
+    font-size: 13.5px;
+  }
+
+  textarea.input-text:focus { border-color: var(--gold); }
+
+  /* Radio & Checkbox */
+  .options-list { display: flex; flex-direction: column; gap: 2px; }
+
+  .option-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .option-item:hover { background: rgba(201,169,110,0.05); }
+
+  .option-item input[type="radio"],
+  .option-item input[type="checkbox"] {
+    display: none;
+  }
+
+  .custom-radio, .custom-check {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .custom-radio { border-radius: 50%; }
+  .custom-check { border-radius: 2px; }
+
+  .option-item input[type="radio"]:checked ~ .custom-radio,
+  .option-item input[type="checkbox"]:checked ~ .custom-check {
+    border-color: var(--gold);
+    background: var(--gold);
+  }
+
+  .option-item input[type="radio"]:checked ~ .custom-radio::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: var(--bg);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .option-item input[type="checkbox"]:checked ~ .custom-check::after {
+    content: '✓';
+    position: absolute;
+    font-size: 10px;
+    color: var(--bg);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+  }
+
+  .option-item input[type="radio"]:checked + span,
+  .option-item input[type="checkbox"]:checked + span { display: none; }
+
+  .option-label {
+    font-size: 13.5px;
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  /* Standalone checkbox */
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .check-item:hover { background: rgba(201,169,110,0.05); }
+
+  .check-item input { display: none; }
+
+  .check-item input[type="checkbox"]:checked ~ .custom-check {
+    border-color: var(--gold);
+    background: var(--gold);
+  }
+
+  .check-item input[type="checkbox"]:checked ~ .custom-check::after {
+    content: '✓';
+    position: absolute;
+    font-size: 10px;
+    color: var(--bg);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+  }
+
+  .notice-box {
+    background: rgba(201,169,110,0.06);
+    border: 1px solid rgba(201,169,110,0.2);
+    padding: 16px;
+    margin-bottom: 14px;
+    font-size: 12.5px;
+    line-height: 1.9;
+    color: var(--muted);
+    font-family: 'Noto Serif KR', serif;
+  }
+
+  /* File upload */
+  .file-upload-area {
+    border: 1px dashed var(--border);
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 4px;
+  }
+
+  .file-upload-area:hover {
+    border-color: var(--gold);
+    background: rgba(201,169,110,0.03);
+  }
+
+  .file-upload-area input { display: none; }
+
+  .upload-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+    opacity: 0.5;
+  }
+
+  .upload-text {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.8;
+    font-family: 'Noto Serif KR', serif;
+  }
+
+  .file-list {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .file-tag {
+    background: rgba(201,169,110,0.1);
+    border: 1px solid rgba(201,169,110,0.2);
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .file-tag button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    padding: 0;
+  }
+
+  /* Navigation */
+  .nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn {
+    padding: 13px 32px;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    font-family: 'Cormorant Garamond', serif;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    text-transform: uppercase;
+  }
+
+  .btn-prev {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .btn-prev:hover { border-color: var(--muted); color: var(--text); }
+
+  .btn-next, .btn-submit {
+    background: var(--gold);
+    color: var(--bg);
+    font-weight: 500;
+  }
+
+  .btn-next:hover, .btn-submit:hover { background: var(--gold-light); }
+
+  /* Thank you screen */
+  .thankyou {
+    display: none;
+    text-align: center;
+    padding: 80px 20px;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  .thankyou.active { display: block; }
+
+  .thankyou-icon {
+    font-size: 40px;
+    margin-bottom: 24px;
+    opacity: 0.8;
+  }
+
+  .thankyou h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--cream);
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+
+  .thankyou p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 2;
+    font-family: 'Noto Serif KR', serif;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .thankyou .gold-line {
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    margin: 24px auto;
+    opacity: 0.5;
+  }
+
+  /* Error */
+  .err-msg {
+    font-size: 11px;
+    color: #c97070;
+    margin-top: 8px;
+    display: none;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  .has-error .err-msg { display: block; }
+  .has-error .input-text { border-bottom-color: #c97070; }
+
+  /* Sending overlay */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(14,11,8,0.85);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    backdrop-filter: blur(8px);
+  }
+
+  .overlay.show { display: flex; }
+
+  .spinner {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .overlay-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+  }
+
+  /* Other input for radio with 기타 */
+  .other-input-wrap {
+    padding: 6px 12px 10px 40px;
+    display: none;
+  }
+
+  .other-input-wrap.show { display: block; }
+
+  @media (max-width: 480px) {
+    .header-meta { grid-template-columns: repeat(2, 1fr); }
+    .btn { padding: 12px 22px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+  <div class="overlay-text">제출 중입니다</div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <div class="progress-steps" id="progressSteps"></div>
+    <div class="progress-label" id="progressLabel">1 / 6</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header" id="mainHeader">
+    <div class="header-eyebrow">파팡 에디터 presents</div>
+    <h1>PERFUME<br><em>CURATING</em></h1>
+    <p class="header-desc">
+      신청자님의 성격, 분위기, 취향, 사진 무드 등을 바탕으로<br>
+      어울리는 향수를 추천해드립니다.<br>
+      응답해주신 내용을 바탕으로 1:1로 향수를 큐레이팅 해드릴 예정입니다.
+    </p>
+    <div class="header-meta">
+      <div class="meta-item">
+        <div class="meta-label">소요시간</div>
+        <div class="meta-value">5 – 10분</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">결과 전달</div>
+        <div class="meta-value">이메일</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">결과 제공일</div>
+        <div class="meta-value">2 – 3일</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">가격</div>
+        <div class="meta-value">10,000원</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SECTION 1 ====== -->
+  <div class="section active" id="sec1">
+    <div class="section-header">
+      <div class="section-num">SECTION 01 OF 06</div>
+      <div class="section-title">신청자님 소개</div>
+    </div>
+
+    <div class="q-card required">
+      <label class="q-label" for="name">이름</label>
+      <input class="input-text" id="name" type="text" placeholder="이름을 입력해주세요">
+      <div class="err-msg">필수 항목입니다.</div>
+    </div>
+
+    <div class="q-card required">
+      <label class="q-label" for="univ">소속 대학 및 학과</label>
+      <input class="input-text" id="univ" type="text" placeholder="ex. 한양대학교 경영학과">
+      <div class="err-msg">필수 항목입니다.</div>
+    </div>
+
+    <div class="q-card required">
+      <label class="q-label" for="birth">출생연도</label>
+      <input class="input-text" id="birth" type="text" placeholder="ex. 981104">
+      <div class="err-msg">필수 항목입니다.</div>
+    </div>
+
+    <div class="q-card required" id="privCard">
+      <label class="q-label">개인정보 수집 및 이용에 동의하시나요?</label>
+      <label class="check-item">
+        <input type="checkbox" id="privacy">
+        <div class="custom-check"></div>
+        <span class="option-label">동의합니다.</span>
+      </label>
+      <div class="err-msg">동의가 필요합니다.</div>
+    </div>
+
+    <div class="q-card" id="confCard">
+      <label class="q-label">개인정보 처리 방침 확인</label>
+      <div class="notice-box">
+        업로드해주신 사진과 개인정보는 향수 큐레이팅 용도로만 확인되며,<br>
+        확인 후 모두 폐기됩니다.<br>
+        제출해주신 내용은 외부에 공개되거나 다른 용도로 사용되지 않습니다.
+      </div>
+      <label class="check-item">
+        <input type="checkbox" id="confirm">
+        <div class="custom-check"></div>
+        <span class="option-label">확인했습니다.</span>
+      </label>
+    </div>
+
+    <div class="nav-bar">
+      <div></div>
+      <button class="btn btn-next" onclick="next(1)">다음 &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ====== SECTION 2 ====== -->
+  <div class="section" id="sec2">
+    <div class="section-header">
+      <div class="section-num">SECTION 02 OF 06</div>
+      <div class="section-title">신청자님 인적사항</div>
+    </div>
+
+    <div class="q-card required" id="genderCard">
+      <label class="q-label">성별</label>
+      <div class="options-list">
+        <label class="option-item">
+          <input type="radio" name="gender" value="남">
+          <div class="custom-radio"></div>
+          <span class="option-label">남</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="gender" value="여">
+          <div class="custom-radio"></div>
+          <span class="option-label">여</span>
+        </label>
+      </div>
+      <div class="err-msg">항목을 선택해주세요.</div>
+    </div>
+
+    <div class="q-card">
+      <label class="q-label" for="mbti">MBTI 4글자를 입력해 주세요.</label>
+      <input class="input-text" id="mbti" type="text" placeholder="ex. INTJ" maxlength="4">
+    </div>
+
+    <div class="q-card required">
+      <label class="q-label" for="phone">신청자 분의 전화번호를 입력해 주세요</label>
+      <div class="q-sub" style="margin-bottom:12px">추천이 완료되면 문자로 완료 문자를 보내드립니다.</div>
+      <input class="input-text" id="phone" type="tel" placeholder="ex. 010-1234-5678">
+      <div class="err-msg">필수 항목입니다.</div>
+    </div>
+
+    <div class="q-card required">
+      <label class="q-label" for="email">신청자 분의 이메일을 알려주세요.</label>
+      <div class="q-sub" style="margin-bottom:12px">이메일로 결과를 보내드립니다.</div>
+      <input class="input-text" id="email" type="email" placeholder="ex. abcd123@naver.com">
+      <div class="err-msg">올바른 이메일을 입력해주세요.</div>
+    </div>
+
+    <div class="nav-bar">
+      <button class="btn btn-prev" onclick="prev(2)">← 이전</button>
+      <button class="btn btn-next" onclick="next(2)">다음 →</button>
+    </div>
+  </div>
+
+  <!-- ====== SECTION 3 ====== -->
+  <div class="section" id="sec3">
+    <div class="section-header">
+      <div class="section-num">SECTION 03 OF 06</div>
+      <div class="section-title">사용경험 / 가격대</div>
+    </div>
+
+    <div class="q-card required" id="usedCard">
+      <label class="q-label">향수를 사용해보신 적이 있나요?</label>
+      <div class="options-list">
+        <label class="option-item">
+          <input type="radio" name="used" value="예">
+          <div class="custom-radio"></div>
+          <span class="option-label">예</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="used" value="아니오">
+          <div class="custom-radio"></div>
+          <span class="option-label">아니오</span>
+        </label>
+      </div>
+      <div class="err-msg">항목을 선택해주세요.</div>
+    </div>
+
+    <div class="q-card">
+      <label class="q-label" for="currentPerfume">있다면 어떤 향수를 사용하고 계신가요?</label>
+      <textarea class="input-text" id="currentPerfume" placeholder="사용 중이신 향수가 있다면 자유롭게 적어주세요."></textarea>
+    </div>
+
+    <div class="q-card required" id="priceCard">
+      <label class="q-label">원하시는 향수 가격대가 있나요?</label>
+      <div class="options-list">
+        <label class="option-item">
+          <input type="radio" name="price" value="10만원 이하">
+          <div class="custom-radio"></div>
+          <span class="option-label">10만원 이하</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="price" value="20만원 이하">
+          <div class="custom-radio"></div>
+          <span class="option-label">20만원 이하</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="price" value="30만원 이하">
+          <div class="custom-radio"></div>
+          <span class="option-label">30만원 이하</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="price" value="가격 상관 없음">
+          <div class="custom-radio"></div>
+          <span class="option-label">가격 상관 없음</span>
+        </label>
+      </div>
+      <div class="err-msg">항목을 선택해주세요.</div>
+    </div>
+
+    <div class="nav-bar">
+      <button class="btn btn-prev" onclick="prev(3)">← 이전</button>
+      <button class="btn btn-next" onclick="next(3)">다음 →</button>
+    </div>
+  </div>
+
+  <!-- ====== SECTION 4 ====== -->
+  <div class="section" id="sec4">
+    <div class="section-header">
+      <div class="section-num">SECTION 04 OF 06</div>
+      <div class="section-title">원하는 이미지 / 향 취향</div>
+    </div>
+
+    <div class="q-card required" id="moodCard">
+      <label class="q-label">본인이 가장 끌리는 분위기를 골라주세요</label>
+      <div class="options-list">
+        <label class="option-item"><input type="radio" name="mood" value="깨끗하고 비누 같은"><div class="custom-radio"></div><span class="option-label">깨끗하고 비누 같은</span></label>
+        <label class="option-item"><input type="radio" name="mood" value="포근하고 부드러운"><div class="custom-radio"></div><span class="option-label">포근하고 부드러운</span></label>
+        <label class="option-item"><input type="radio" name="mood" value="차갑고 도시적인"><div class="custom-radio"></div><span class="option-label">차갑고 도시적인</span></label>
+        <label class="option-item"><input type="radio" name="mood" value="성숙하고 분위기 있는"><div class="custom-radio"></div><span class="option-label">성숙하고 분위기 있는</span></label>
+        <label class="option-item"><input type="radio" name="mood" value="러블리하고 사랑스러운"><div class="custom-radio"></div><span class="option-label">러블리하고 사랑스러운</span></label>
+        <label class="option-item"><input type="radio" name="mood" value="상큼하고 밝은"><div class="custom-radio"></div><span class="option-label">상큼하고 밝은</span></label>
+        <label class="option-item"><input type="radio" name="mood" value="중성적이고 담백한"><div class="custom-radio"></div><span class="option-label">중성적이고 담백한</span></label>
+        <label class="option-item"><input type="radio" name="mood" value="자연스럽고 편안한 느낌"><div class="custom-radio"></div><span class="option-label">자연스럽고 편안한 느낌</span></label>
+        <label class="option-item"><input type="radio" name="mood" value="잘 모르겠음"><div class="custom-radio"></div><span class="option-label">잘 모르겠음</span></label>
+      </div>
+      <div class="err-msg">항목을 선택해주세요.</div>
+    </div>
+
+    <div class="q-card required" id="imageCard">
+      <label class="q-label">향수를 통해 만들고 싶은 이미지는 무엇인가요?</label>
+      <div class="options-list">
+        <label class="option-item"><input type="radio" name="image" value="깨끗한 사람처럼 보이고 싶다"><div class="custom-radio"></div><span class="option-label">깨끗한 사람처럼 보이고 싶다</span></label>
+        <label class="option-item"><input type="radio" name="image" value="고급스럽고 분위기 있어 보이고 싶다"><div class="custom-radio"></div><span class="option-label">고급스럽고 분위기 있어 보이고 싶다</span></label>
+        <label class="option-item"><input type="radio" name="image" value="포근하고 다정한 느낌을 주고 싶다"><div class="custom-radio"></div><span class="option-label">포근하고 다정한 느낌을 주고 싶다</span></label>
+        <label class="option-item"><input type="radio" name="image" value="개성 있고 기억에 남고 싶다"><div class="custom-radio"></div><span class="option-label">개성 있고 기억에 남고 싶다</span></label>
+        <label class="option-item"><input type="radio" name="image" value="연애하고 싶다"><div class="custom-radio"></div><span class="option-label">연애하고 싶다</span></label>
+        <label class="option-item"><input type="radio" name="image" value="그냥 나한테 잘 어울리는 향을 찾고 싶다"><div class="custom-radio"></div><span class="option-label">그냥 나한테 잘 어울리는 향을 찾고 싶다</span></label>
+      </div>
+      <div class="err-msg">항목을 선택해주세요.</div>
+    </div>
+
+    <div class="q-card required" id="likeNoteCard">
+      <label class="q-label">평소 좋아하는 향이 있나요?</label>
+      <div class="options-list">
+        <label class="option-item"><input type="radio" name="likeNote" value="비누/섬유유연제"><div class="custom-radio"></div><span class="option-label">비누 / 섬유유연제</span></label>
+        <label class="option-item"><input type="radio" name="likeNote" value="파우더리한"><div class="custom-radio"></div><span class="option-label">파우더리한</span></label>
+        <label class="option-item"><input type="radio" name="likeNote" value="플로럴"><div class="custom-radio"></div><span class="option-label">플로럴</span></label>
+        <label class="option-item"><input type="radio" name="likeNote" value="시트러스"><div class="custom-radio"></div><span class="option-label">시트러스</span></label>
+        <label class="option-item"><input type="radio" name="likeNote" value="머스크"><div class="custom-radio"></div><span class="option-label">머스크</span></label>
+        <label class="option-item"><input type="radio" name="likeNote" value="우디"><div class="custom-radio"></div><span class="option-label">우디</span></label>
+        <label class="option-item"><input type="radio" name="likeNote" value="바닐라/스윗"><div class="custom-radio"></div><span class="option-label">바닐라 / 스윗</span></label>
+        <label class="option-item"><input type="radio" name="likeNote" value="허브/그린"><div class="custom-radio"></div><span class="option-label">허브 / 그린</span></label>
+        <label class="option-item"><input type="radio" name="likeNote" value="스파이시"><div class="custom-radio"></div><span class="option-label">스파이시</span></label>
+        <label class="option-item"><input type="radio" name="likeNote" value="아직 잘 모르겠다"><div class="custom-radio"></div><span class="option-label">아직 잘 모르겠다</span></label>
+      </div>
+      <div class="err-msg">항목을 선택해주세요.</div>
+    </div>
+
+    <div class="q-card required" id="dislikeNoteCard">
+      <label class="q-label">반대로 부담스럽거나 싫어하는 향이 있나요?</label>
+      <div class="options-list">
+        <label class="option-item"><input type="radio" name="dislikeNote" value="달달한 향"><div class="custom-radio"></div><span class="option-label">달달한 향</span></label>
+        <label class="option-item"><input type="radio" name="dislikeNote" value="진한 꽃향기"><div class="custom-radio"></div><span class="option-label">진한 꽃향기</span></label>
+        <label class="option-item"><input type="radio" name="dislikeNote" value="무거운 향 또는 멀미 나는 향"><div class="custom-radio"></div><span class="option-label">무거운 향 또는 멀미 나는 향</span></label>
+        <label class="option-item"><input type="radio" name="dislikeNote" value="아저씨 향(목욕탕 스킨 냄새)"><div class="custom-radio"></div><span class="option-label">아저씨 향 (목욕탕 스킨 냄새)</span></label>
+        <label class="option-item"><input type="radio" name="dislikeNote" value="인공적이고 강한 향"><div class="custom-radio"></div><span class="option-label">인공적이고 강한 향</span></label>
+        <label class="option-item"><input type="radio" name="dislikeNote" value="없음"><div class="custom-radio"></div><span class="option-label">없음</span></label>
+        <label class="option-item" id="otherOption">
+          <input type="radio" name="dislikeNote" value="기타" onchange="toggleOther(this)">
+          <div class="custom-radio"></div>
+          <span class="option-label">기타</span>
+        </label>
+      </div>
+      <div class="other-input-wrap" id="otherWrap">
+        <input class="input-text" id="dislikeOther" type="text" placeholder="직접 입력해주세요">
+      </div>
+      <div class="err-msg">항목을 선택해주세요.</div>
+    </div>
+
+    <div class="q-card required" id="seasonCard">
+      <label class="q-label">선호하는 계절감이 있나요?</label>
+      <div class="options-list">
+        <label class="option-item"><input type="radio" name="season" value="봄에 뿌리기 좋은"><div class="custom-radio"></div><span class="option-label">봄에 뿌리기 좋은</span></label>
+        <label class="option-item"><input type="radio" name="season" value="여름에 뿌리기 좋은"><div class="custom-radio"></div><span class="option-label">여름에 뿌리기 좋은</span></label>
+        <label class="option-item"><input type="radio" name="season" value="가을에 뿌리기 좋은"><div class="custom-radio"></div><span class="option-label">가을에 뿌리기 좋은</span></label>
+        <label class="option-item"><input type="radio" name="season" value="겨울에 뿌리기 좋은"><div class="custom-radio"></div><span class="option-label">겨울에 뿌리기 좋은</span></label>
+        <label class="option-item"><input type="radio" name="season" value="사계절 무난한 향"><div class="custom-radio"></div><span class="option-label">사계절 무난한 향</span></label>
+      </div>
+      <div class="err-msg">항목을 선택해주세요.</div>
+    </div>
+
+    <div class="nav-bar">
+      <button class="btn btn-prev" onclick="prev(4)">← 이전</button>
+      <button class="btn btn-next" onclick="next(4)">다음 →</button>
+    </div>
+  </div>
+
+  <!-- ====== SECTION 5 ====== -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">SECTION 05 OF 06</div>
+      <div class="section-title">자유 서술 / 사진 업로드</div>
+      <div class="section-desc">자유 서술과 사진 업로드는 필수 작성이 아닙니다.<br>떠오르지 않으시면 그냥 넘어가셔도 됩니다 :)</div>
+    </div>
+
+    <div class="q-card">
+      <label class="q-label" for="personality">평소 본인의 성격을 자유롭게 적어주세요 <span style="color:var(--muted);font-size:12px">(필수X)</span></label>
+      <div class="q-sub" style="margin-bottom:10px">EX) 조용한 편 / 낯가림 있음 / 밝고 장난기 많음 / 차분함 / 예민함 등</div>
+      <textarea class="input-text" id="personality" placeholder="자유롭게 적어주세요."></textarea>
+    </div>
+
+    <div class="q-card">
+      <label class="q-label" for="wantedScent">원하는 향의 느낌을 자유롭게 적어주세요 <span style="color:var(--muted);font-size:12px">(필수X)</span></label>
+      <div class="q-sub" style="margin-bottom:10px">EX) 은은한 비누향인데 흔하지 않았으면 좋겠어요</div>
+      <textarea class="input-text" id="wantedScent" placeholder="자유롭게 적어주세요."></textarea>
+    </div>
+
+    <div class="q-card">
+      <label class="q-label" for="references">평소 좋아하는 브랜드, 향수, 연예인, 패션 스타일이 있다면 적어주세요 <span style="color:var(--muted);font-size:12px">(필수X)</span></label>
+      <textarea class="input-text" id="references" placeholder="자유롭게 적어주세요."></textarea>
+    </div>
+
+    <div class="q-card">
+      <label class="q-label">본인을 가장 잘 나타내는 사진이나 무드 이미지를 첨부해주세요. <span style="color:var(--muted);font-size:12px">(필수X)</span></label>
+      <div class="q-sub" style="margin-bottom:12px">업로드한 사진은 큐레이팅 참고용으로만 확인되며, 확인 후 폐기됩니다.<br>최대 5개 · JPG / PNG · 각 10MB 이하</div>
+      <label class="file-upload-area" id="uploadArea">
+        <input type="file" id="photoUpload" multiple accept="image/jpeg,image/png" onchange="handleFiles(this)">
+        <div class="upload-icon">🖼</div>
+        <div class="upload-text">클릭하여 사진을 선택하거나<br>여기에 드래그 앤 드롭하세요</div>
+      </label>
+      <div class="file-list" id="fileList"></div>
+    </div>
+
+    <div class="nav-bar">
+      <button class="btn btn-prev" onclick="prev(5)">← 이전</button>
+      <button class="btn btn-next" onclick="next(5)">다음 →</button>
+    </div>
+  </div>
+
+  <!-- ====== SECTION 6 ====== -->
+  <div class="section" id="sec6">
+    <div class="section-header">
+      <div class="section-num">SECTION 06 OF 06</div>
+      <div class="section-title">결제 확인</div>
+      <div class="section-desc">
+        답변 하시느라 고생 많으셨습니다.<br>
+        결과는 2~3일 이내로 신청자 분의 메일로 전달해드리겠습니다.<br>
+        오늘도 향기로운 하루 보내시길 바랍니다 :)
+      </div>
+    </div>
+
+    <div class="q-card required" id="pickCard">
+      <label class="q-label">기본적으로 향수는 2가지와 Editor Pick을 추천 드립니다.</label>
+      <label class="check-item">
+        <input type="checkbox" id="pickConfirm">
+        <div class="custom-check"></div>
+        <span class="option-label">확인했습니다.</span>
+      </label>
+      <div class="err-msg">확인이 필요합니다.</div>
+    </div>
+
+    <div class="q-card required" id="instaCard">
+      <label class="q-label">인스타그램 계정(@pappang_editor)에 결과지가 업로드 되는 것에 동의하십니까?</label>
+      <div class="q-sub" style="margin-bottom:12px">업로드 전 별도로 다시 동의를 구할 예정입니다. 업로드를 원하지 않으시면 '아니오'를 선택해주세요.</div>
+      <div class="options-list">
+        <label class="option-item">
+          <input type="radio" name="instaAgree" value="예">
+          <div class="custom-radio"></div>
+          <span class="option-label">예</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="instaAgree" value="아니오">
+          <div class="custom-radio"></div>
+          <span class="option-label">아니오</span>
+        </label>
+      </div>
+      <div class="err-msg">항목을 선택해주세요.</div>
+    </div>
+
+    <div class="q-card required" id="payCard">
+      <label class="q-label">PERFUME CURATING의 가격은 10,000원입니다.</label>
+      <div class="notice-box">
+        아래 계좌로 입금 부탁드립니다.<br>
+        <strong style="color:var(--gold-light)">국민은행  94030201070339  김*민</strong>
+      </div>
+      <label class="check-item">
+        <input type="checkbox" id="paid">
+        <div class="custom-check"></div>
+        <span class="option-label">입금했습니다.</span>
+      </label>
+      <div class="err-msg">입금 확인 후 체크해주세요.</div>
+    </div>
+
+    <div class="nav-bar">
+      <button class="btn btn-prev" onclick="prev(6)">← 이전</button>
+      <button class="btn btn-submit" onclick="submitForm()">제출하기 ✦</button>
+    </div>
+  </div>
+
+  <!-- THANK YOU -->
+  <div class="thankyou" id="thankyou">
+    <div class="thankyou-icon">✦</div>
+    <h2>감사합니다</h2>
+    <div class="gold-line"></div>
+    <p>
+      응답해 주셔서 감사합니다.<br>
+      결과는 2~3일 이내로 입력하신 이메일로 전달해드리겠습니다.<br><br>
+      궁금하신 점이 있다면<br>
+      인스타그램 <strong style="color:var(--gold)">@pappang_editor</strong>로 DM 주세요.
+    </p>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+  // ── 구글 시트 연동 ──────────────────────────────────────────────
+  // 아래 URL을 본인의 Google Apps Script 웹앱 URL로 바꿔주세요.
+  // 설정 방법은 아래 주석을 참고하세요.
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyzFZNQGWx25JZ9CwqirAQOQzg76tYqJiv6w_u4NTv2ppU86JCsLzJ7ogHm24sRPfsS/exec";
+  // ────────────────────────────────────────────────────────────────
+
+  const TOTAL = 6;
+  let current = 1;
+  let uploadedFiles = [];
+
+  // Progress bar
+  function buildProgress() {
+    const wrap = document.getElementById('progressSteps');
+    wrap.innerHTML = '';
+    for (let i = 1; i <= TOTAL; i++) {
+      const d = document.createElement('div');
+      d.className = 'step-dot' + (i === current ? ' active' : i < current ? ' done' : '');
+      wrap.appendChild(d);
+    }
+    document.getElementById('progressLabel').textContent = current + ' / ' + TOTAL;
+  }
+
+  buildProgress();
+
+  function showSection(n) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    const sec = document.getElementById('sec' + n);
+    if (sec) { sec.classList.add('active'); }
+    current = n;
+    buildProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function prev(n) { showSection(n - 1); }
+
+  function next(n) {
+    if (!validate(n)) return;
+    showSection(n + 1);
+  }
+
+  // ── Validation ───────────────────────────────────────────────
+  function setErr(el, show) {
+    const card = el.closest('.q-card');
+    if (!card) return;
+    card.classList.toggle('has-error', show);
+  }
+
+  function validate(sec) {
+    let ok = true;
+
+    if (sec === 1) {
+      const name = document.getElementById('name');
+      if (!name.value.trim()) { setErr(name, true); ok = false; } else { setErr(name, false); }
+
+      const univ = document.getElementById('univ');
+      if (!univ.value.trim()) { setErr(univ, true); ok = false; } else { setErr(univ, false); }
+
+      const birth = document.getElementById('birth');
+      if (!birth.value.trim()) { setErr(birth, true); ok = false; } else { setErr(birth, false); }
+
+      const priv = document.getElementById('privacy');
+      const pc = document.getElementById('privCard');
+      if (!priv.checked) { pc.classList.add('has-error'); ok = false; } else { pc.classList.remove('has-error'); }
+    }
+
+    if (sec === 2) {
+      const gender = document.querySelector('input[name="gender"]:checked');
+      const gc = document.getElementById('genderCard');
+      if (!gender) { gc.classList.add('has-error'); ok = false; } else { gc.classList.remove('has-error'); }
+
+      const phone = document.getElementById('phone');
+      if (!phone.value.trim()) { setErr(phone, true); ok = false; } else { setErr(phone, false); }
+
+      const email = document.getElementById('email');
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+      if (!emailOk) { setErr(email, true); ok = false; } else { setErr(email, false); }
+    }
+
+    if (sec === 3) {
+      const used = document.querySelector('input[name="used"]:checked');
+      const uc = document.getElementById('usedCard');
+      if (!used) { uc.classList.add('has-error'); ok = false; } else { uc.classList.remove('has-error'); }
+
+      const price = document.querySelector('input[name="price"]:checked');
+      const pc2 = document.getElementById('priceCard');
+      if (!price) { pc2.classList.add('has-error'); ok = false; } else { pc2.classList.remove('has-error'); }
+    }
+
+    if (sec === 4) {
+      [['mood','moodCard'],['image','imageCard'],['likeNote','likeNoteCard'],
+       ['dislikeNote','dislikeNoteCard'],['season','seasonCard']].forEach(([name,id]) => {
+        const v = document.querySelector(`input[name="${name}"]:checked`);
+        const c = document.getElementById(id);
+        if (!v) { c.classList.add('has-error'); ok = false; } else { c.classList.remove('has-error'); }
+      });
+    }
+
+    if (sec === 6) {
+      const pick = document.getElementById('pickConfirm');
+      const pickC = document.getElementById('pickCard');
+      if (!pick.checked) { pickC.classList.add('has-error'); ok = false; } else { pickC.classList.remove('has-error'); }
+
+      const insta = document.querySelector('input[name="instaAgree"]:checked');
+      const ic = document.getElementById('instaCard');
+      if (!insta) { ic.classList.add('has-error'); ok = false; } else { ic.classList.remove('has-error'); }
+
+      const paid = document.getElementById('paid');
+      const payC = document.getElementById('payCard');
+      if (!paid.checked) { payC.classList.add('has-error'); ok = false; } else { payC.classList.remove('has-error'); }
+    }
+
+    return ok;
+  }
+
+  // ── Other option ─────────────────────────────────────────────
+  function toggleOther(radio) {
+    const wrap = document.getElementById('otherWrap');
+    wrap.classList.toggle('show', radio.value === '기타' && radio.checked);
+  }
+
+  // ── File upload ───────────────────────────────────────────────
+  function handleFiles(input) {
+    const newFiles = Array.from(input.files);
+    const combined = [...uploadedFiles, ...newFiles].slice(0, 5);
+    uploadedFiles = combined;
+    renderFiles();
+    input.value = '';
+  }
+
+  function renderFiles() {
+    const list = document.getElementById('fileList');
+    list.innerHTML = '';
+    uploadedFiles.forEach((f, i) => {
+      const tag = document.createElement('div');
+      tag.className = 'file-tag';
+      tag.innerHTML = `<span>${f.name}</span><button onclick="removeFile(${i})">×</button>`;
+      list.appendChild(tag);
+    });
+  }
+
+  function removeFile(i) {
+    uploadedFiles.splice(i, 1);
+    renderFiles();
+  }
+
+  // Drag & drop
+  const ua = document.getElementById('uploadArea');
+  ua.addEventListener('dragover', e => { e.preventDefault(); ua.style.borderColor = 'var(--gold)'; });
+  ua.addEventListener('dragleave', () => { ua.style.borderColor = 'var(--border)'; });
+  ua.addEventListener('drop', e => {
+    e.preventDefault();
+    ua.style.borderColor = 'var(--border)';
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    const combined = [...uploadedFiles, ...files].slice(0, 5);
+    uploadedFiles = combined;
+    renderFiles();
+  });
+
+  // ── Submit ────────────────────────────────────────────────────
+  async function submitForm() {
+    if (!validate(6)) return;
+
+    const dislikeVal = document.querySelector('input[name="dislikeNote"]:checked')?.value;
+    const dislikeFinal = dislikeVal === '기타'
+      ? (document.getElementById('dislikeOther').value || '기타')
+      : dislikeVal;
+
+    const data = {
+      이름: document.getElementById('name').value,
+      소속: document.getElementById('univ').value,
+      출생연도: document.getElementById('birth').value,
+      개인정보동의: document.getElementById('privacy').checked ? '동의' : '',
+      성별: document.querySelector('input[name="gender"]:checked')?.value || '',
+      MBTI: document.getElementById('mbti').value,
+      전화번호: document.getElementById('phone').value,
+      이메일: document.getElementById('email').value,
+      향수사용경험: document.querySelector('input[name="used"]:checked')?.value || '',
+      현재사용향수: document.getElementById('currentPerfume').value,
+      가격대: document.querySelector('input[name="price"]:checked')?.value || '',
+      선호분위기: document.querySelector('input[name="mood"]:checked')?.value || '',
+      원하는이미지: document.querySelector('input[name="image"]:checked')?.value || '',
+      좋아하는향: document.querySelector('input[name="likeNote"]:checked')?.value || '',
+      싫어하는향: dislikeFinal || '',
+      선호계절: document.querySelector('input[name="season"]:checked')?.value || '',
+      성격: document.getElementById('personality').value,
+      원하는향느낌: document.getElementById('wantedScent').value,
+      레퍼런스: document.getElementById('references').value,
+      인스타동의: document.querySelector('input[name="instaAgree"]:checked')?.value || '',
+      입금확인: document.getElementById('paid').checked ? '확인' : '',
+      제출시각: new Date().toLocaleString('ko-KR'),
+    };
+
+    document.getElementById('overlay').classList.add('show');
+
+    try {
+      if (SCRIPT_URL && !SCRIPT_URL.includes('여기에')) {
+        const params = new URLSearchParams(data);
+        await fetch(SCRIPT_URL + '?' + params.toString(), {
+          method: 'GET',
+          mode: 'no-cors',
+        });
+      }
+      // 성공 처리
+      document.getElementById('overlay').classList.remove('show');
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById('mainHeader').style.display = 'none';
+      document.querySelector('.progress-wrap').style.display = 'none';
+      document.getElementById('thankyou').classList.add('active');
+    } catch (e) {
+      document.getElementById('overlay').classList.remove('show');
+      alert('제출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  }
+</script>
+</body>
+</html>
